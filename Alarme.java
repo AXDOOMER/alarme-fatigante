@@ -33,10 +33,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 // Sound
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
-import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.AudioClip;
 
 // Classe d'un thread qui roule dans le fond
 class Veille implements Runnable {
@@ -45,9 +42,6 @@ class Veille implements Runnable {
 	final int THRES = 3;
 
 	public Veille(SpinnerModel h, SpinnerModel m) {
-		// Doit être initialisé pour que le son fonctionne
-		final JFXPanel fxPanel = new JFXPanel();
-
 		// Beurk!
 		heures = h;
 		minutes = m;
@@ -96,14 +90,9 @@ class Veille implements Runnable {
 	}
 
 	public void buzzer() {
-		// http://soundbible.com/tags-alarm.html
-		MediaPlayer a = new MediaPlayer(new Media(new File("alarme.mp3").toURI().toString()));
-		a.setOnEndOfMedia(new Runnable() {
-			public void run() {
-				a.seek(Duration.ZERO);
-			}
-		});
-		a.play();
+		AudioClip clip = new AudioClip(new File("alarme.mp3").toURI().toString());
+		clip.setCycleCount(AudioClip.INDEFINITE);
+		clip.play();
 	}
 }
 
