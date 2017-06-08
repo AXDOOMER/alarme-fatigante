@@ -1,4 +1,4 @@
-// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
+﻿// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
 
 // Ce programme n'est pas programmé très rigoureusement.
 // Je ne suis pas responsable des gens qui ne se réveillent pas.
@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.awt.GridLayout;
+import javax.swing.JOptionPane;
 
 // Fichiers
 import java.io.File;
@@ -52,7 +53,7 @@ class Veille implements Runnable {
 				Thread.sleep(1*1000);
 			} catch(InterruptedException ie) {
 				Thread.currentThread().interrupt();
-				System.err.println(ie);
+				JOptionPane.showMessageDialog(null, ie);
 			}
 
 			LocalDateTime time = LocalDateTime.now();
@@ -79,7 +80,7 @@ class Veille implements Runnable {
 				Thread.sleep(60*60*1000);
 			} catch(InterruptedException ie) {
 				Thread.currentThread().interrupt();
-				System.err.println(ie);
+				JOptionPane.showMessageDialog(null, ie);
 			}
 		}
 	}
