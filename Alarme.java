@@ -31,7 +31,6 @@ import javax.swing.SpinnerNumberModel;
 
 // Date
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 // Son
 import javax.sound.sampled.AudioInputStream;
@@ -77,7 +76,7 @@ class Cadran implements Runnable {
 				if (time.getHour() == wake.getHour()) {
 					if (++tics > THRES) {
 						buzzer();
-						break;	// Sort de cette boucle pour ne pas buzzer plusieurs fois
+						break;	// Sort de cette boucle pour ne pas déclencher le buzzer plusieurs fois
 					}
 					continue;	// On fait revérifier quelques autres fois le temps
 				}
@@ -110,7 +109,7 @@ class Cadran implements Runnable {
 			JOptionPane.showMessageDialog(null, ioe);
 		} catch (LineUnavailableException lue) {
 			JOptionPane.showMessageDialog(null, lue);
-		} catch (java.lang.IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			JOptionPane.showMessageDialog(null, iae);
 		}
 	}
