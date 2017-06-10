@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017, Alexandre-Xavier Labonté-Lamoureux
+// Copyright (c) 2017, Alexandre-Xavier Labonté-Lamoureux
 //
 // Permission to use, copy, modify, and/or distribute this software for any
 // purpose with or without fee is hereby granted, provided that the above
@@ -17,37 +17,44 @@
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-import java.awt.GridLayout;
 import javax.swing.JOptionPane;
+import java.awt.GridLayout;
 
 // Fichiers
 import java.io.File;
+import java.io.IOException;
 
-// Numeric boxes
+// Boîtes numériques
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-// Date / Time
+// Date
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-// Sound
-import javafx.scene.media.AudioClip;
+// Son
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.LineUnavailableException;
 
-// Classe d'un thread qui roule dans le fond
-class Veille implements Runnable {
+// Classe qui veille jusqu'à déclancher l'alarme
+class Cadran implements Runnable {
 
 	int tics = 0;
 	final int THRES = 3;
 
-	public Veille(SpinnerModel h, SpinnerModel m) {
+	public Cadran(SpinnerModel h, SpinnerModel m) {
 		// Beurk!
 		heures = h;
 		minutes = m;
 	}
 
-	// Cancer d'avoir des références vers ça ici. Mauvaise conception. 
+	// Mauvaise conception...
 	SpinnerModel heures;
 	SpinnerModel minutes;
 
@@ -90,9 +97,22 @@ class Veille implements Runnable {
 	}
 
 	public void buzzer() {
-		AudioClip clip = new AudioClip(new File("alarme.mp3").toURI().toString());
-		clip.setCycleCount(AudioClip.INDEFINITE);
-		clip.play();
+		try {
+			AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("alarme.au"));
+			AudioFormat format = inputStream.getFormat();
+			DataLine.Info info = new DataLine.Info(Clip.class, format);
+			Clip clip = (Clip)AudioSystem.getLine(info);
+			clip.open(inputStream);
+			clip.loop(Clip.LOOP_CONTINUOUSLY);
+		} catch (UnsupportedAudioFileException uafe) {
+			JOptionPane.showMessageDialog(null, uafe);
+		} catch (IOException ioe) {
+			JOptionPane.showMessageDialog(null, ioe);
+		} catch (LineUnavailableException lue) {
+			JOptionPane.showMessageDialog(null, lue);
+		} catch (java.lang.IllegalArgumentException iae) {
+			JOptionPane.showMessageDialog(null, iae);
+		}
 	}
 }
 
@@ -104,33 +124,30 @@ public class Alarme extends JFrame {
 		JPanel pan = new JPanel();
 		pan.setLayout(layout);
 
-		// 1
-		JLabel lbl1 = new JLabel("Entrez heure:");
-		pan.add(lbl1);
+		// Ajout des composantes dans la grille
+		JLabel lblHeures = new JLabel("Entrez heure:");
+		pan.add(lblHeures);
 
-		// 2 - il est à noter qu'un spinner ne met pas à jour sa valeur tant que le focus n'as pas changé
 		SpinnerModel heures = new SpinnerNumberModel(8, 0, 23, 1);
-		JSpinner heuresBox = new JSpinner(heures);
-		pan.add(heuresBox);
+		JSpinner spnrHeures = new JSpinner(heures);
+		pan.add(spnrHeures);
 
-		// 3
-		JLabel lbl3 = new JLabel("Entrez minutes:");
-		pan.add(lbl3);
+		JLabel lblMinutes = new JLabel("Entrez minutes:");
+		pan.add(lblMinutes);
 
-		// 4 - il est à noter qu'un spinner ne met pas à jour sa valeur tant que le focus n'as pas changé
 		SpinnerModel minutes = new SpinnerNumberModel(30, 0, 59, 1);
-		JSpinner minutesBox = new JSpinner(minutes);
-		pan.add(minutesBox);
+		JSpinner spnrMinutes = new JSpinner(minutes);
+		pan.add(spnrMinutes);
 
-		// Place stuff inside the JFrame
+		// Mettre les composantes dans le JFrame
 		this.getContentPane().add(pan);
 		this.pack();
 		this.setVisible(true);
 
-		// Muh threads
-		Veille v = new Veille(heures, minutes);
-		Thread t1 = new Thread(v);
-		t1.start();
+		// Un fil d’exécution!
+		Cadran cadran = new Cadran(heures, minutes);
+		Thread threadCadran = new Thread(cadran);
+		threadCadran.start();
 	}
 
 	public static void main(String[] args) {
